@@ -11,6 +11,7 @@ public class User implements Model {
   private final String organisation;
   private final boolean isAdmin;
 
+  // For default users - no need to pass isAdmin, it will be automatically false
   public User(int id, String username, String password, String firstName, String lastName,
               String organisation) {
     this(id, username, password, firstName, lastName, organisation, false);

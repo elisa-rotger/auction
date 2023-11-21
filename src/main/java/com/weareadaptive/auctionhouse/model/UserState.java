@@ -32,8 +32,4 @@ public class UserState extends State<User> {
             .anyMatch(userUsername -> userUsername.equalsIgnoreCase(username));
   }
 
-  public Optional<User> findUserById(int userId) {
-    return stream().filter(user -> user.getId() == userId).findFirst();
-  }
-
 }
