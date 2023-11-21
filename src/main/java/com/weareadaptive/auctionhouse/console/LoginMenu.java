@@ -42,7 +42,7 @@ public class LoginMenu extends ConsoleMenu {
           createMenu(
                   context,
                   option("User management", userMenu::display, u -> user.isAdmin()),
-                  // option("Auction management", auctionMenu::display),
+                  option("Auction management", auctionMenu::display),
                   leave("Log out")
           );
         }, () -> out.println("Invalid username/password combination"));

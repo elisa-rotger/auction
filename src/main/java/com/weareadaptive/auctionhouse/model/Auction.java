@@ -40,4 +40,10 @@ public class Auction implements Model {
     }
 
     public String getOwner() { return owner; }
+
+    public String getSymbol() { return symbol; }
+
+    public int getAvailableQty() { return availableQty; }
+
+    public double getMinPrice() { return minPrice; }
 }

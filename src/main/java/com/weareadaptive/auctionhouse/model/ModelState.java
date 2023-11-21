@@ -1,5 +1,5 @@
 package com.weareadaptive.auctionhouse.model;
 
 // Is a java record like a TS record?
-public record ModelState(UserState userState) {
+public record ModelState(UserState userState, AuctionState auctionState) {
 }

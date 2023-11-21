@@ -3,6 +3,7 @@ package com.weareadaptive.auctionhouse.console;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
+import com.weareadaptive.auctionhouse.model.AuctionState;
 import com.weareadaptive.auctionhouse.model.ModelState;
 import com.weareadaptive.auctionhouse.model.User;
 import com.weareadaptive.auctionhouse.model.UserState;
@@ -13,7 +14,7 @@ public class ConsoleAuction {
 
   public ConsoleAuction() {
     // Model state = user state? Why is this needed
-    var state = new ModelState(new UserState());
+    var state = new ModelState(new UserState(), new AuctionState());
     initData(state);
     var scanner = new Scanner(System.in);
     menuContext = new MenuContext(state, scanner, System.out);
