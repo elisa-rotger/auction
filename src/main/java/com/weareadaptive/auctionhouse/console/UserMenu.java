@@ -4,10 +4,6 @@ import com.weareadaptive.auctionhouse.StringUtil;
 import com.weareadaptive.auctionhouse.model.BusinessException;
 import com.weareadaptive.auctionhouse.model.User;
 
-import java.util.HashMap;
-import java.util.HashSet;
-
-// TODO: Add user management options
 public class UserMenu extends ConsoleMenu {
 
     @Override
@@ -17,10 +13,9 @@ public class UserMenu extends ConsoleMenu {
                 option("Create new user", this::createUser),
                 option("Get all users", this::getAllUsers),
                 option("Get all organisations", this::getAllOrganisations),
-                option("Get user details", this::testFn),
+                option("Get user details", this::getUserDetails),
                 option("Block / unblock user accounts", this::testFn),
-                // Allow logout from menu
-                leave("Log out")
+                leave("Go Back")
                 );
     }
 
@@ -98,7 +93,7 @@ public class UserMenu extends ConsoleMenu {
         out.println("All users ---------->");
 
         // How should this be formatted?
-        // It kinda looks like rxjs
+        // It kinda looks like rxjs, that's fun
         context.getState()
                 .userState()
                 .stream()
@@ -107,18 +102,20 @@ public class UserMenu extends ConsoleMenu {
                                 user.getUsername(),
                                 user.getFirstName(),
                                 user.getLastName(),
-                                user.getOrganisation()));
+                                user.getOrganisation()
+                        )
+                );
 
         out.println("Press enter to continue...");
         scanner.nextLine();
     }
 
     private void getAllOrganisations(MenuContext context) {
-        // Keep in mind we could have duplicates -> filter them out?
         var out = context.getOut();
         var scanner = context.getScanner();
         out.println("Organisations ---------->");
 
+        // Move logic to user state?
         context.getState()
                 .userState()
                 .stream()
@@ -126,8 +123,37 @@ public class UserMenu extends ConsoleMenu {
                 // Remove duplicate organisations
                 .distinct()
                 .forEach(out::println);
+
+        out.println("Press enter to continue...");
+        scanner.nextLine();
     }
 
-    // TODO: Get user details
+    private void getUserDetails(MenuContext context) {
+        var out = context.getOut();
+        var scanner = context.getScanner();
+
+        // This is displaying the current user's details -> add a dropdown to choose a user and show that one?
+
+        var userOptions = context.getState()
+                .userState()
+                .stream()
+                .map(u ->
+                        option(u.getUsername(), () -> out.printf(
+                                "Username: %s, %nFirst Name: %s, %nLast Name: %s, %nOrganisation: %s %n",
+                                u.getUsername(),
+                                u.getFirstName(),
+                                u.getLastName(),
+                                u.getOrganisation()
+                        )))
+                .toList();
+
+        // TODO: Accessing the first option works, but I can't figure out how to spread the options when passing it to the menu
+        createMenu(
+                context,
+                userOptions.get(0),
+                leave("Go back")
+        );
+    }
+
     // TODO: Block / unblock user
 }
