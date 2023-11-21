@@ -34,7 +34,7 @@ public class LoginMenu extends ConsoleMenu {
     // Investigate how context works
     context.getState()
         .userState()
-        .findUserByUsername(username, password)
+        .findUserByUsernameAndPassword(username, password)
         .ifPresentOrElse(user -> {
           context.setCurrentUser(user);
           out.printf("Welcome %s %s %n", user.getFirstName(), user.getLastName());

@@ -5,7 +5,6 @@ import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.groupingBy;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,11 +18,18 @@ public class UserState extends State<User> {
 
 
   // Find specific user by its username
-  public Optional<User> findUserByUsername(String username, String password) {
+  public Optional<User> findUserByUsernameAndPassword(String username, String password) {
     return stream()
         .filter(user -> user.getUsername().equalsIgnoreCase(username))
         .filter(user -> user.validatePassword(password))
         .findFirst();
+  }
+
+  public boolean doesUsernameExist(String username) {
+    return stream()
+            .map(User::getUsername)
+            // Used to have filter by username -> findFirst -> isPresent but the IDE is smarter than me
+            .anyMatch(userUsername -> userUsername.equalsIgnoreCase(username));
   }
 
 }
