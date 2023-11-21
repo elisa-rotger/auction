@@ -4,6 +4,9 @@ import com.weareadaptive.auctionhouse.StringUtil;
 import com.weareadaptive.auctionhouse.model.BusinessException;
 import com.weareadaptive.auctionhouse.model.User;
 
+import java.util.HashMap;
+import java.util.HashSet;
+
 // TODO: Add user management options
 public class UserMenu extends ConsoleMenu {
 
@@ -13,7 +16,7 @@ public class UserMenu extends ConsoleMenu {
                 context,
                 option("Create new user", this::createUser),
                 option("Get all users", this::getAllUsers),
-                option("Get all organisations", this::testFn),
+                option("Get all organisations", this::getAllOrganisations),
                 option("Get user details", this::testFn),
                 option("Block / unblock user accounts", this::testFn),
                 // Allow logout from menu
@@ -29,7 +32,6 @@ public class UserMenu extends ConsoleMenu {
         var out = context.getOut();
         var scanner = context.getScanner();
         var state = context.getState();
-        // The username must be an alphanumerical string without spaces or special characters.
 
         out.println("Enter the username:");
         final var username = scanner.nextLine();
@@ -95,8 +97,7 @@ public class UserMenu extends ConsoleMenu {
         var scanner = context.getScanner();
         out.println("All users ---------->");
 
-        // How to print multiple things for each user - printf? (print stream?)
-        // How should this be formatted
+        // How should this be formatted?
         // It kinda looks like rxjs
         context.getState()
                 .userState()
@@ -112,7 +113,21 @@ public class UserMenu extends ConsoleMenu {
         scanner.nextLine();
     }
 
-    // TODO: Get all organisations
+    private void getAllOrganisations(MenuContext context) {
+        // Keep in mind we could have duplicates -> filter them out?
+        var out = context.getOut();
+        var scanner = context.getScanner();
+        out.println("Organisations ---------->");
+
+        context.getState()
+                .userState()
+                .stream()
+                .map(User::getOrganisation)
+                // Remove duplicate organisations
+                .distinct()
+                .forEach(out::println);
+    }
+
     // TODO: Get user details
     // TODO: Block / unblock user
 }
