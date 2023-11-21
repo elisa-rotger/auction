@@ -24,57 +24,55 @@ public class UserMenu extends ConsoleMenu {
         var scanner = context.getScanner();
         var state = context.getState();
 
-        out.println("Enter the username:");
-        final var username = scanner.nextLine();
-
-        var usernameExists = state.userState().doesUsernameExist(username);
-
-        if (usernameExists) {
-            out.println("Username already exists");
-            // TODO: Investigate if I can make the user just go back to the username input
-            return;
-        }
-
-        if (!StringUtil.isAlphanumeric(username)){
-            out.printf("Invalid username format: %s. %nCan only contain alphanumeric characters and no spaces. %n", username);
-            // TODO: Investigate if I can make the user just go back to the username input
-            return;
-        }
-
-        out.println("Enter the password:");
-        var password = readPassword(scanner);
-
-        // Enter password a second time
-        out.println("Repeat the password:");
-        var secondPassword = readPassword(scanner);
-
-        if (!password.equals(secondPassword)) {
-            out.println("Password has to be the same");
-            // TODO: Investigate if I can make the user just go back to the password input
-            return;
-        }
-
-        out.println("Enter the first name:");
-        var firstName = scanner.nextLine();
-
-        out.println("Enter the last name:");
-        var lastName = scanner.nextLine();
-
-        out.println("Enter the organization:");
-        var organization = scanner.nextLine();
-
-        var newUser = new User(
-                state.userState().nextId(),
-                username,
-                password,
-                firstName,
-                lastName,
-                organization
-        );
-
-        // TODO: How to catch if something goes wrong in the creation?
-
+        // Why does it not blow up if I wrap the whole thing with the try / catch, but it does if I only wrap the add?
         try {
+            out.println("Enter the username:");
+            final var username = scanner.nextLine();
+
+            var usernameExists = state.userState().doesUsernameExist(username);
+
+            if (usernameExists) {
+                out.println("Username already exists");
+                // TODO: Investigate if I can make the user just go back to the username input
+                return;
+            }
+
+            if (!StringUtil.isAlphanumeric(username)){
+                out.printf("Invalid username format: %s. %nCan only contain alphanumeric characters and no spaces. %n", username);
+                // TODO: Investigate if I can make the user just go back to the username input
+                return;
+            }
+
+            out.println("Enter the password:");
+            var password = readPassword(scanner);
+
+            // Enter password a second time
+            out.println("Repeat the password:");
+            var secondPassword = readPassword(scanner);
+
+            if (!password.equals(secondPassword)) {
+                out.println("Password has to be the same");
+                // TODO: Investigate if I can make the user just go back to the password input
+                return;
+            }
+
+            out.println("Enter the first name:");
+            var firstName = scanner.nextLine();
+
+            out.println("Enter the last name:");
+            var lastName = scanner.nextLine();
+
+            out.println("Enter the organization:");
+            var organization = scanner.nextLine();
+
+            var newUser = new User(
+                    state.userState().nextId(),
+                    username,
+                    password,
+                    firstName,
+                    lastName,
+                    organization
+            );
             state.userState().add(newUser);
         } catch(BusinessException businessException) {
             out.println("Cannot create user.");
