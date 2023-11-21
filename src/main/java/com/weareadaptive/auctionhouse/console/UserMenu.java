@@ -14,15 +14,11 @@ public class UserMenu extends ConsoleMenu {
                 option("Get all users", this::getAllUsers),
                 option("Get all organisations", this::getAllOrganisations),
                 option("Get user details", this::getUserDetails),
-                option("Block / unblock user accounts", this::testFn),
+                option("Block / unblock user accounts", this::blockUser),
                 leave("Go Back")
                 );
     }
 
-    private void testFn (MenuContext context) {
-        var out = context.getOut();
-        out.println("Test function");
-    }
     private void createUser(MenuContext context) {
         var out = context.getOut();
         var scanner = context.getScanner();
@@ -76,8 +72,7 @@ public class UserMenu extends ConsoleMenu {
                 organization
         );
 
-        // How to catch if something goes wrong in the creation?
-        // It's breaking right now
+        // TODO: How to catch if something goes wrong in the creation?
 
         try {
             state.userState().add(newUser);
@@ -92,7 +87,7 @@ public class UserMenu extends ConsoleMenu {
         var scanner = context.getScanner();
         out.println("All users ---------->");
 
-        // How should this be formatted?
+        // TODO: How should this be formatted?
         // It kinda looks like rxjs, that's fun
         context.getState()
                 .userState()
@@ -115,7 +110,7 @@ public class UserMenu extends ConsoleMenu {
         var scanner = context.getScanner();
         out.println("Organisations ---------->");
 
-        // Move logic to user state?
+        // TODO: Move logic to user state?
         context.getState()
                 .userState()
                 .stream()
@@ -130,9 +125,6 @@ public class UserMenu extends ConsoleMenu {
 
     private void getUserDetails(MenuContext context) {
         var out = context.getOut();
-        var scanner = context.getScanner();
-
-        // This is displaying the current user's details -> add a dropdown to choose a user and show that one?
 
         var userOptions = context.getState()
                 .userState()
@@ -156,4 +148,8 @@ public class UserMenu extends ConsoleMenu {
     }
 
     // TODO: Block / unblock user
+    private void blockUser (MenuContext context) {
+        var out = context.getOut();
+        out.println("Test function");
+    }
 }

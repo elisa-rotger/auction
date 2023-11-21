@@ -41,9 +41,7 @@ public class LoginMenu extends ConsoleMenu {
           // Pass user management options only if the user is admin
           createMenu(
                   context,
-                  // User management options -> how to filter by isAdmin?
-                  option("User management", userMenu::display),
-                  // Auction management options,
+                  option("User management", userMenu::display, u -> user.isAdmin()),
                   // option("Auction management", auctionMenu::display),
                   leave("Log out")
           );

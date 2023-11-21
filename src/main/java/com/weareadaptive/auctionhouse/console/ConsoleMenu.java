@@ -17,6 +17,7 @@ public abstract class ConsoleMenu {
     return new MenuOption(title, c -> action.run(), c -> true);
   }
 
+  // isShown -> determine if the option should show
   protected MenuOption option(String title, Consumer<MenuContext> action,
                               Predicate<MenuContext> isShown) {
     return new MenuOption(title, action, isShown);
