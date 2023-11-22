@@ -3,6 +3,8 @@ package com.weareadaptive.auctionhouse.model;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import static java.lang.Math.min;
 import static java.util.Collections.reverseOrder;
 
 import static com.weareadaptive.auctionhouse.StringUtil.isNullOrEmpty;
@@ -13,9 +15,10 @@ public class Auction implements Model {
     private final String owner;
     private final String symbol;
     private final double minPrice;
-    private int availableQty;
+    private final int availableQty;
     private boolean isOpen;
-    private List<Bid> bidList;
+    private final List<Bid> bidList;
+    private final List<WinningBid> winningBidList;
 
     public int getId() {
         return id;
@@ -46,7 +49,7 @@ public class Auction implements Model {
         this.availableQty = availableQty;
         this.isOpen = true;
         this.bidList = new ArrayList<Bid>();
-
+        this.winningBidList = new ArrayList<WinningBid>();
     }
 
     public String getOwner() { return owner; }
@@ -55,6 +58,7 @@ public class Auction implements Model {
     public double getMinPrice() { return minPrice; }
     public boolean getIsOpen() { return isOpen; }
     public List<Bid> getBidList() { return bidList; }
+    public List<WinningBid> getWinningBidList() { return winningBidList; }
 
     public void bid(String biddingUser, double price, int quantity) {
         if (!this.isOpen) {
@@ -70,10 +74,11 @@ public class Auction implements Model {
         }
 
         if (quantity > availableQty) {
-            // Couldn't this option be partially filled?
             throw new BusinessException("Bid quantity exceeds available quantity.");
         }
 
+        // submissionTime might not be needed -> list is sorted by addition date anyway
+        // Could be good to generate a timestamp in the summary though, so leaving it in for now
         bidList.add(new Bid(biddingUser, price, quantity, System.currentTimeMillis()));
     }
 
@@ -81,14 +86,28 @@ public class Auction implements Model {
         return bidList.stream().sorted(reverseOrder(Comparator.comparing(Bid::getPrice))).toList();
     }
     public void closeAuction() {
-        // TODO: Closing bids logic
         this.isOpen = false;
-
-        // Order by descending price
+        // Order by descending price & execution date
         var orderedBidList = orderBidList(bidList);
 
+        var quantityLeft = availableQty;
+        double profit = 0.0;
+        // Close them in that order until there is no more quantity left
         for (Bid bid : orderedBidList) {
-            System.out.println(bid.getQuantity());
+            if (quantityLeft > 0) {
+                // Quantity -> either the quantity left in the auction, or the bidding quantity, whichever is lower
+                var quantityToClose = min(quantityLeft, bid.getQuantity());
+                // Add money won by bid to total profit
+                profit = profit + (quantityToClose * bid.getPrice());
+                // Decrease quantity left on the auction
+                quantityLeft = quantityLeft - quantityToClose;
+
+                // Add executed bid to the winning bid list
+                winningBidList.add(new WinningBid(quantityToClose, bid));
+            }
         }
+
+        // Loop is done -> we have: total money won (profit), quantity left without selling in the auction (quantityLeft)
+        // TODO: Summary?
     }
 }
