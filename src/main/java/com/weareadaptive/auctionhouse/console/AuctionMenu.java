@@ -1,6 +1,7 @@
 package com.weareadaptive.auctionhouse.console;
 
 import com.weareadaptive.auctionhouse.model.Auction;
+import com.weareadaptive.auctionhouse.model.BusinessException;
 
 public class AuctionMenu extends ConsoleMenu {
     @Override
@@ -27,29 +28,35 @@ public class AuctionMenu extends ConsoleMenu {
         var scanner = context.getScanner();
         var state = context.getState();
 
-        var owner = context.getCurrentUser().getUsername();
+        try {
+            var owner = context.getCurrentUser().getUsername();
 
-        out.println("Enter the instrument symbol:");
-        final var symbol = scanner.nextLine();
+            out.println("Enter the instrument symbol:");
+            final var symbol = scanner.nextLine();
 
-        out.println("Enter the available quantity:");
-        final var availableQty = Integer.parseInt(scanner.nextLine());
+            out.println("Enter the available quantity:");
+            final var availableQty = Integer.parseInt(scanner.nextLine());
 
-        out.println("Enter the minimum price:");
-        final var minPrice = Double.parseDouble(scanner.nextLine());
+            out.println("Enter the minimum price:");
+            final var minPrice = Double.parseDouble(scanner.nextLine());
 
-        // TODO: Add error handling
-        var newAuction = new Auction(state.auctionState().nextId(), owner, symbol, minPrice, availableQty);
+            var newAuction = new Auction(state.auctionState().nextId(), owner, symbol, minPrice, availableQty);
 
-        state.auctionState().add(newAuction);
+            state.auctionState().add(newAuction);
 
-        out.printf("Auction with id %s has been added. Symbol: %s %n", newAuction.getId(), newAuction.getSymbol());
-        out.println("Press enter to continue...");
-        scanner.nextLine();
+            out.printf("Auction with id %s has been added. Symbol: %s %n", newAuction.getId(), newAuction.getSymbol());
+            out.println("Press enter to continue...");
+            scanner.nextLine();
+        } catch(BusinessException businessException) {
+            out.println("Cannot create auction.");
+            out.println(businessException.getMessage());
+        }
+
     }
 
     private void listOwnAuctions(MenuContext context) {
         var out = context.getOut();
+        var scanner = context.getScanner();
         var state = context.getState();
 
         var owner = context.getCurrentUser().getUsername();
@@ -58,10 +65,18 @@ public class AuctionMenu extends ConsoleMenu {
         state.auctionState()
                 .stream()
                 .filter(a -> a.getOwner().equals(owner))
-                .forEach(a -> out.printf("Symbol: %s, Minimum price: %s, Available quantity: %s %n",
+                .forEach(a -> out.printf(
+                        "Symbol: %s, Minimum price: %s, Available quantity: %s || %s %n",
                         a.getSymbol(),
                         a.getMinPrice(),
-                        a.getAvailableQty())
+                        a.getAvailableQty(),
+                        a.getIsOpen() ? "(Open)" : "(Closed)"
+                        )
                 );
+
+        // TODO: Add message when no auctions have been created
+
+        out.println("Press enter to continue...");
+        scanner.nextLine();
     }
 }

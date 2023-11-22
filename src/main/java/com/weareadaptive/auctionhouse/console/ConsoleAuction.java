@@ -13,7 +13,6 @@ public class ConsoleAuction {
   private final MenuContext menuContext;
 
   public ConsoleAuction() {
-    // Model state = user state? Why is this needed
     var state = new ModelState(new UserState(), new AuctionState());
     initData(state);
     var scanner = new Scanner(System.in);

@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 // First I'd need an Auction object, like the User
 public class State<T extends Model> {
   public static final String ITEM_ALREADY_EXISTS = "Item already exists";
+  // We keep our state stored in a map - collection of key-value pairs
   private final Map<Integer, T> models;
   private int currentId = 0;
 

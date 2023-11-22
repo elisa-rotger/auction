@@ -12,7 +12,6 @@ public class MenuContext {
   private User currentUser;
 
   public MenuContext(ModelState state, Scanner scanner, PrintStream out) {
-    // Model state = user state
     this.state = state;
     this.scanner = scanner;
     this.out = out;

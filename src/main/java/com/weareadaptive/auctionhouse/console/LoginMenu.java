@@ -11,7 +11,6 @@ public class LoginMenu extends ConsoleMenu {
     }
 
     // Overrides the parent's 'display' method
-    // Move display method to AuctionMenu / UserMenu ?
     @Override
     public void display(MenuContext context) {
         createMenu(
