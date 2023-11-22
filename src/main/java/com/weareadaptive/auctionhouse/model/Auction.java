@@ -1,5 +1,8 @@
 package com.weareadaptive.auctionhouse.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.weareadaptive.auctionhouse.StringUtil.isNullOrEmpty;
 import static com.weareadaptive.auctionhouse.IntUtil.isValidQty;
 
@@ -10,7 +13,7 @@ public class Auction implements Model {
     private final double minPrice;
     private int availableQty;
     private boolean isOpen;
-    private Bid[] bidList;
+    private List<Bid> bidList;
 
     public int getId() {
         return id;
@@ -40,6 +43,7 @@ public class Auction implements Model {
         this.minPrice = minPrice;
         this.availableQty = availableQty;
         this.isOpen = true;
+        this.bidList = new ArrayList<Bid>();
 
     }
 
@@ -48,8 +52,28 @@ public class Auction implements Model {
     public int getAvailableQty() { return availableQty; }
     public double getMinPrice() { return minPrice; }
     public boolean getIsOpen() { return isOpen; }
-    public Bid[] getBidList() { return bidList; }
+    public List<Bid> getBidList() { return bidList; }
 
+    public void bid(String biddingUser, double price, int quantity) {
+        if (!this.isOpen) {
+            throw new BusinessException("Cannot bid on a closed auction.");
+        }
+
+        if (this.owner.equals(biddingUser)) {
+            throw new BusinessException("Owner cannot bid on their own auction.");
+        }
+
+        if (price < this.minPrice) {
+            throw new BusinessException("Price is inferior to minimum price set.");
+        }
+
+        if (quantity > availableQty) {
+            // Couldn't this option be partially filled?
+            throw new BusinessException("Bid quantity exceeds available quantity.");
+        }
+
+        bidList.add(new Bid(biddingUser, price, quantity, System.currentTimeMillis()));
+    }
     public void closeAuction() {
         // TODO: Closing bids logic
         this.isOpen = false;

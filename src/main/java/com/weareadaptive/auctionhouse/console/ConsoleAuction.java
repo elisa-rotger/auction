@@ -3,10 +3,7 @@ package com.weareadaptive.auctionhouse.console;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
-import com.weareadaptive.auctionhouse.model.AuctionState;
-import com.weareadaptive.auctionhouse.model.ModelState;
-import com.weareadaptive.auctionhouse.model.User;
-import com.weareadaptive.auctionhouse.model.UserState;
+import com.weareadaptive.auctionhouse.model.*;
 
 
 public class ConsoleAuction {
@@ -26,6 +23,13 @@ public class ConsoleAuction {
         new User(state.userState().nextId(), "jf", "mypassword", "JF", "Legault", "Org 1"),
         new User(state.userState().nextId(), "thedude", "biglebowski", "Walter", "Sobchak", "Org 2")
     ).forEach(u -> state.userState().add(u));
+
+    // Initializes the program with some auctions
+    Stream.of(
+            new Auction(state.userState().nextId(), "admin", "AAPL", 20.2, 5),
+            new Auction(state.userState().nextId(), "jf", "TESLA", 43.6, 10),
+            new Auction(state.userState().nextId(), "thedude", "AAPL", 21.0, 2)
+    ).forEach(u -> state.auctionState().add(u));
   }
 
   public void start() {

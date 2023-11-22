@@ -12,4 +12,10 @@ public class AuctionState extends State<Auction> {
     public Auction[] findAuctionsByOwner(String owner) {
         return stream().filter(auction -> auction.getOwner().equals(owner)).toArray(Auction[]::new);
     }
+
+    public Auction[] findOtherAuctions(String owner) {
+        return stream().filter(auction ->
+                !auction.getOwner().equals(owner) && auction.getIsOpen()
+        ).toArray(Auction[]::new);
+    }
 }

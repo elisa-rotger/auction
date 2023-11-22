@@ -1,5 +1,6 @@
 package com.weareadaptive.auctionhouse.console;
 
+import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.function.Consumer;
@@ -98,5 +99,12 @@ public abstract class ConsoleMenu {
       this.title = title;
       this.action = action;
     }
+  }
+
+  public static <T> T[] append(T[] arr, T element) {
+    final int N = arr.length;
+    arr = Arrays.copyOf(arr, N + 1);
+    arr[N] = element;
+    return arr;
   }
 }

@@ -107,7 +107,6 @@ public class UserMenu extends ConsoleMenu {
 
     private void getAllOrganisations(MenuContext context) {
         var out = context.getOut();
-        var scanner = context.getScanner();
         out.println("Organisations ---------->");
 
         context.getState()
@@ -123,7 +122,6 @@ public class UserMenu extends ConsoleMenu {
 
     private void getUserDetails(MenuContext context) {
         var out = context.getOut();
-        var scanner = context.getScanner();
 
         var userOptions = context.getState()
                 .userState()
@@ -138,9 +136,11 @@ public class UserMenu extends ConsoleMenu {
                         )))
                 .toArray(MenuOption[]::new);
 
+        var allOptions = append(userOptions, leave("Go Back"));
+
         createMenu(
                 context,
-                userOptions
+                allOptions
         );
 
         pressEnter(context);

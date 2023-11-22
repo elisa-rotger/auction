@@ -3,18 +3,13 @@ package com.weareadaptive.auctionhouse.model;
 import static com.weareadaptive.auctionhouse.IntUtil.isValidQty;
 import static com.weareadaptive.auctionhouse.StringUtil.isNullOrEmpty;
 
-public class Bid implements Model {
-    private final int id;
+public class Bid {
     private final double price;
     private final int quantity;
     private final String owner;
     private final long submissionTime;
 
-    public int getId() {
-        return id;
-    }
-
-    public Bid(int id, double price, int quantity, String owner) {
+    public Bid(String owner, double price, int quantity, long submissionTime) {
         if (isNullOrEmpty(owner)) {
             throw new BusinessException("owner cannot be null or empty");
         }
@@ -27,12 +22,10 @@ public class Bid implements Model {
             throw new BusinessException("quantity needs to be higher than 0");
         }
 
-        this.id = id;
         this.price = price;
         this.quantity = quantity;
         this.owner = owner;
-        // Save time the bid was created on
-        this.submissionTime = System.currentTimeMillis();
+        this.submissionTime = submissionTime;
     }
 
     public double getPrice() { return price; }
