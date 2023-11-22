@@ -10,10 +10,7 @@ public class Auction implements Model {
     private final double minPrice;
     private int availableQty;
     private boolean isOpen;
-
-    // This class should have a modifiable list of bids
-    // TODO: Bid class?
-    // private array bids;
+    private Bid[] bidList;
 
     public int getId() {
         return id;
@@ -47,11 +44,14 @@ public class Auction implements Model {
     }
 
     public String getOwner() { return owner; }
-
     public String getSymbol() { return symbol; }
-
     public int getAvailableQty() { return availableQty; }
-
     public double getMinPrice() { return minPrice; }
     public boolean getIsOpen() { return isOpen; }
+    public Bid[] getBidList() { return bidList; }
+
+    public void closeAuction() {
+        // TODO: Closing bids logic
+        this.isOpen = false;
+    }
 }

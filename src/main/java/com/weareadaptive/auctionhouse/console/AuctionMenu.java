@@ -47,8 +47,7 @@ public class AuctionMenu extends ConsoleMenu {
             state.auctionState().add(newAuction);
 
             out.printf("Auction with id %s has been added. Symbol: %s %n", newAuction.getId(), newAuction.getSymbol());
-            out.println("Press enter to continue...");
-            scanner.nextLine();
+            pressEnter(context);
         } catch(BusinessException businessException) {
             out.println("Cannot create auction.");
             out.println(businessException.getMessage());
@@ -69,21 +68,35 @@ public class AuctionMenu extends ConsoleMenu {
         var hasNoAuctions = auctionList.length == 0;
         if (hasNoAuctions) {
             out.println("User has no auctions, open or closed.");
-            out.println("Press enter to continue...");
-            scanner.nextLine();
+            pressEnter(context);
             return;
         }
 
         Arrays.stream(auctionList)
-                .forEach(a -> out.printf(
-                    "Symbol: %s, Minimum price: %s, Available quantity: %s || %s %n",
-                    a.getSymbol(),
-                    a.getMinPrice(),
-                    a.getAvailableQty(),
-                    a.getIsOpen() ? "(Open)" : "(Closed)")
+                .forEach(a -> {
+                            out.printf(
+                                    "Symbol: %s, Minimum price: %s, Available quantity: %s || %s %n",
+                                    a.getSymbol(),
+                                    a.getMinPrice(),
+                                    a.getAvailableQty(),
+                                    a.getIsOpen() ? "(Open)" : "(Closed)");
+
+                            var bidList = a.getBidList();
+                            Arrays.stream(bidList).toList().forEach(b -> {
+                                out.println("List of bids: ---------->");
+                                out.printf(
+                                        "Quantity: %s, Price: %s, Owner: %s %n",
+                                        b.getQuantity(),
+                                        b.getPrice(),
+                                        b.getOwner());
+                            });
+                        }
                 );
 
-        out.println("Press enter to continue...");
-        scanner.nextLine();
+        pressEnter(context);
+    }
+
+    private void createBid(MenuContext context) {
+        // 1. List all possible auctions
     }
 }

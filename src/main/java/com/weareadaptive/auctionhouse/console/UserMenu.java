@@ -1,8 +1,11 @@
 package com.weareadaptive.auctionhouse.console;
 
 import com.weareadaptive.auctionhouse.StringUtil;
+import com.weareadaptive.auctionhouse.model.Auction;
 import com.weareadaptive.auctionhouse.model.BusinessException;
 import com.weareadaptive.auctionhouse.model.User;
+
+import java.sql.Array;
 
 public class UserMenu extends ConsoleMenu {
 
@@ -99,8 +102,7 @@ public class UserMenu extends ConsoleMenu {
                         )
                 );
 
-        out.println("Press enter to continue...");
-        scanner.nextLine();
+        pressEnter(context);
     }
 
     private void getAllOrganisations(MenuContext context) {
@@ -108,7 +110,6 @@ public class UserMenu extends ConsoleMenu {
         var scanner = context.getScanner();
         out.println("Organisations ---------->");
 
-        // TODO: Move logic to user state?
         context.getState()
                 .userState()
                 .stream()
@@ -117,12 +118,12 @@ public class UserMenu extends ConsoleMenu {
                 .distinct()
                 .forEach(out::println);
 
-        out.println("Press enter to continue...");
-        scanner.nextLine();
+        pressEnter(context);
     }
 
     private void getUserDetails(MenuContext context) {
         var out = context.getOut();
+        var scanner = context.getScanner();
 
         var userOptions = context.getState()
                 .userState()
@@ -135,14 +136,14 @@ public class UserMenu extends ConsoleMenu {
                                 u.getLastName(),
                                 u.getOrganisation()
                         )))
-                .toList();
+                .toArray(MenuOption[]::new);
 
-        // TODO: Accessing the first option works, but I can't figure out how to spread the options when passing it to the menu
         createMenu(
                 context,
-                userOptions.get(0),
-                leave("Go back")
+                userOptions
         );
+
+        pressEnter(context);
     }
 
     // TODO: Block / unblock user
