@@ -1,7 +1,9 @@
 package com.weareadaptive.auctionhouse.model;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import static java.util.Collections.reverseOrder;
 
 import static com.weareadaptive.auctionhouse.StringUtil.isNullOrEmpty;
 import static com.weareadaptive.auctionhouse.IntUtil.isValidQty;
@@ -74,8 +76,19 @@ public class Auction implements Model {
 
         bidList.add(new Bid(biddingUser, price, quantity, System.currentTimeMillis()));
     }
+
+    List<Bid> orderBidList(List<Bid> originalBidList) {
+        return bidList.stream().sorted(reverseOrder(Comparator.comparing(Bid::getPrice))).toList();
+    }
     public void closeAuction() {
         // TODO: Closing bids logic
         this.isOpen = false;
+
+        // Order by descending price
+        var orderedBidList = orderBidList(bidList);
+
+        for (Bid bid : orderedBidList) {
+            System.out.println(bid.getQuantity());
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.weareadaptive.auctionhouse.model;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -7,8 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AuctionTest {
     private static Stream<Arguments> createAuctionArguments() {
@@ -41,5 +42,35 @@ public class AuctionTest {
     public void createAuctionShouldThrowWhenInvalidProperty(String propertyName, Executable auctionExecutable) {
         var exception = assertThrows(BusinessException.class, auctionExecutable);
         assertTrue(exception.getMessage().contains(propertyName));
+    }
+
+    @Test
+    @DisplayName("orderBidList should sort the existing bids by descending price order")
+    public void shouldOrderBidListByPrice() {
+        var auction = new Auction(1, "username", "AAPL", 20.5, 5);
+        auction.bid("username2", 22, 2);
+        auction.bid("username3", 24, 3);
+        auction.bid("username4", 21, 3);
+        auction.bid("username5", 26, 3);
+
+        var auctionList = auction.getBidList();
+        var orderedList = auction.orderBidList(auctionList);
+
+        assertEquals(orderedList.get(0).getOwner(), "username5");
+    }
+
+    @Test
+    @DisplayName("orderBidList should sort the existing bids by earliest execution date when price is matched")
+    public void shouldOrderBidListByDate() {
+        var auction = new Auction(1, "username", "AAPL", 20.5, 5);
+        auction.bid("username2", 22, 2);
+        auction.bid("username3", 26, 3);
+        auction.bid("username4", 21, 3);
+        auction.bid("username5", 26, 3);
+
+        var auctionList = auction.getBidList();
+        var orderedList = auction.orderBidList(auctionList);
+
+        assertEquals(orderedList.get(0).getOwner(), "username3");
     }
 }

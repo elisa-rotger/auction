@@ -14,7 +14,7 @@ public class AuctionMenu extends ConsoleMenu {
                 context,
                 // TODO: Auction functionality
                 option("Create new auction", this::createAuction),
-                option("Close auction", this::testFn),
+                option("Close auction", this::closeAuction),
                 option("View my auctions", this::listOwnAuctions),
                 option("Bid on an auction", this::createBid),
                 option("View bids won", this::testFn),
@@ -81,8 +81,8 @@ public class AuctionMenu extends ConsoleMenu {
                                     a.getIsOpen() ? "(Open)" : "(Closed)");
 
                             var bidList = a.getBidList();
+                            out.println("List of bids: ---------->");
                             bidList.forEach(b -> {
-                                out.println("List of bids: ---------->");
                                 out.printf(
                                         "Quantity: %s, Price: %s, Bidder: %s %n",
                                         b.getQuantity(),
@@ -141,5 +141,42 @@ public class AuctionMenu extends ConsoleMenu {
                 context,
                 allOptions
         );
+    }
+
+    private void closeAuction(MenuContext context) {
+        // TODO: Extract display menu of auctions to separate method
+        var out = context.getOut();
+        var state = context.getState();
+        var scanner = context.getScanner();
+
+        var owner = context.getCurrentUser().getUsername();
+        var auctionList = state.auctionState().findAuctionsByOwner(owner);
+        var hasNoAuctions = auctionList.length == 0;
+
+        if (hasNoAuctions) {
+            out.println("User has no auctions, open or closed.");
+            pressEnter(context);
+            return;
+        }
+
+        var auctionOptions = Arrays.stream(auctionList)
+                .map(auction ->
+                        option(
+                                "Symbol: " + auction.getSymbol() +
+                                        ", Minimum price: " + auction.getMinPrice() +
+                                        ", Available quantity: " + auction.getAvailableQty()
+                                , () -> {
+                                    out.println("Closing auction...");
+                                    auction.closeAuction();
+                                }))
+                .toArray(MenuOption[]::new);
+
+        var allOptions = append(auctionOptions, leave("Go Back"));
+
+        createMenu(context, allOptions);
+
+        // Bids with best prices first
+        // Can be partially closed if the bid exceeds the quantity left in the auction
+        // In case of a price tie - select the bid that was done first
     }
 }
