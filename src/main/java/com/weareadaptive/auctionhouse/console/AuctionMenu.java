@@ -64,7 +64,17 @@ public class AuctionMenu extends ConsoleMenu {
         var owner = context.getCurrentUser().getUsername();
 
         // TODO: Add list of bids, if available
-        Arrays.stream(state.auctionState().findAuctionsByOwner(owner))
+        var auctionList = state.auctionState().findAuctionsByOwner(owner);
+
+        var hasNoAuctions = auctionList.length == 0;
+        if (hasNoAuctions) {
+            out.println("User has no auctions, open or closed.");
+            out.println("Press enter to continue...");
+            scanner.nextLine();
+            return;
+        }
+
+        Arrays.stream(auctionList)
                 .forEach(a -> out.printf(
                     "Symbol: %s, Minimum price: %s, Available quantity: %s || %s %n",
                     a.getSymbol(),
@@ -72,9 +82,6 @@ public class AuctionMenu extends ConsoleMenu {
                     a.getAvailableQty(),
                     a.getIsOpen() ? "(Open)" : "(Closed)")
                 );
-
-
-        // TODO: Add message when no auctions have been created
 
         out.println("Press enter to continue...");
         scanner.nextLine();
