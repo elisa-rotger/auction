@@ -1,10 +1,9 @@
 package com.weareadaptive.auctionhouse.console;
 
 import com.weareadaptive.auctionhouse.model.Auction;
-import com.weareadaptive.auctionhouse.model.Bid;
+import com.weareadaptive.auctionhouse.model.AuctionSummary;
 import com.weareadaptive.auctionhouse.model.BusinessException;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class AuctionMenu extends ConsoleMenu {
@@ -12,7 +11,6 @@ public class AuctionMenu extends ConsoleMenu {
     public void display(MenuContext context) {
         createMenu(
                 context,
-                // TODO: Auction functionality
                 option("Create new auction", this::createAuction),
                 option("Close auction", this::closeAuction),
                 option("View my auctions", this::listOwnAuctions),
@@ -79,16 +77,22 @@ public class AuctionMenu extends ConsoleMenu {
                                     a.getMinPrice(),
                                     a.getAvailableQty(),
                                     a.getIsOpen() ? "(Open)" : "(Closed)");
+                            if (a.getIsOpen()) {
+                                // If auction is open -> show current open bids
+                                var bidList = a.getBidList();
+                                out.println("List of bids: ---------->");
+                                bidList.forEach(b -> {
+                                    out.printf(
+                                            "Quantity: %s, Price: %s, Bidder: %s %n",
+                                            b.getQuantity(),
+                                            b.getPrice(),
+                                            b.getOwner());
+                                });
+                            } else {
+                                // If auction is closed -> show summary
+                                displayAuctionSummary(context, a.getAuctionSummary());
+                            }
 
-                            var bidList = a.getBidList();
-                            out.println("List of bids: ---------->");
-                            bidList.forEach(b -> {
-                                out.printf(
-                                        "Quantity: %s, Price: %s, Bidder: %s %n",
-                                        b.getQuantity(),
-                                        b.getPrice(),
-                                        b.getOwner());
-                            });
                         }
                 );
 
@@ -97,14 +101,12 @@ public class AuctionMenu extends ConsoleMenu {
 
     private void createBid(MenuContext context) {
         var out = context.getOut();
-        var state = context.getState();
         var scanner = context.getScanner();
 
         var bidder = context.getCurrentUser().getUsername();
-        var auctionList = state.auctionState().findOtherAuctions(bidder);
-        var noAuctions = auctionList.length == 0;
+        var auctionList = context.getState().auctionState().findOtherAuctions(bidder);
 
-        if (noAuctions) {
+        if (auctionList.length == 0) {
             out.println("No available open auctions to bid on.");
             pressEnter(context);
             return;
@@ -146,14 +148,11 @@ public class AuctionMenu extends ConsoleMenu {
     private void closeAuction(MenuContext context) {
         // TODO: Extract display menu of auctions to separate method
         var out = context.getOut();
-        var state = context.getState();
-        var scanner = context.getScanner();
 
         var owner = context.getCurrentUser().getUsername();
-        var auctionList = state.auctionState().findAuctionsByOwner(owner);
-        var hasNoAuctions = auctionList.length == 0;
+        var auctionList = context.getState().auctionState().findAuctionsByOwner(owner);
 
-        if (hasNoAuctions) {
+        if (auctionList.length == 0) {
             out.println("User has no auctions, open or closed.");
             pressEnter(context);
             return;
@@ -168,15 +167,30 @@ public class AuctionMenu extends ConsoleMenu {
                                 , () -> {
                                     out.println("Closing auction...");
                                     auction.closeAuction();
+                                    displayAuctionSummary(context, auction.getAuctionSummary());
                                 }))
                 .toArray(MenuOption[]::new);
 
-        var allOptions = append(auctionOptions, leave("Go Back"));
+        createMenu(context, append(auctionOptions, leave("Go Back")));
+    }
 
-        createMenu(context, allOptions);
+    private void displayAuctionSummary(MenuContext context, AuctionSummary summary) {
+        var out = context.getOut();
 
-        // Bids with best prices first
-        // Can be partially closed if the bid exceeds the quantity left in the auction
-        // In case of a price tie - select the bid that was done first
+        out.println("Summary of closed auction: ---------->");
+        out.printf(
+                "Total revenue: %s, Sold quantity: %s, Remaining quantity: %s %n",
+                summary.totalRevenue(),
+                summary.soldQty(),
+                summary.remainingQty()
+        );
+        out.println("List of winning bids: ---------->");
+        summary.winningBids().forEach(b ->
+                out.printf(
+                        "Quantity: %s, Price: %s, Bidder: %s %n",
+                        b.amount(),
+                        b.originalBid().getPrice(),
+                        b.originalBid().getOwner()
+                ));
     }
 }

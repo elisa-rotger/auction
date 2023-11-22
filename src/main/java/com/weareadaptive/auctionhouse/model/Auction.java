@@ -19,6 +19,7 @@ public class Auction implements Model {
     private boolean isOpen;
     private final List<Bid> bidList;
     private final List<WinningBid> winningBidList;
+    private AuctionSummary auctionSummary;
 
     public int getId() {
         return id;
@@ -59,6 +60,7 @@ public class Auction implements Model {
     public boolean getIsOpen() { return isOpen; }
     public List<Bid> getBidList() { return bidList; }
     public List<WinningBid> getWinningBidList() { return winningBidList; }
+    public AuctionSummary getAuctionSummary() { return auctionSummary; }
 
     public void bid(String biddingUser, double price, int quantity) {
         if (!this.isOpen) {
@@ -108,6 +110,7 @@ public class Auction implements Model {
         }
 
         // Loop is done -> we have: total money won (profit), quantity left without selling in the auction (quantityLeft)
-        // TODO: Summary?
+        var totalSoldQty = availableQty - quantityLeft;
+        this.auctionSummary = new AuctionSummary(profit, totalSoldQty, quantityLeft, winningBidList);
     }
 }
