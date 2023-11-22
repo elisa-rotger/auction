@@ -30,11 +30,11 @@ public class Auction implements Model {
         }
 
         if (!isValidQty(availableQty)) {
-            throw new BusinessException("available quantity needs to be higher than 0");
+            throw new BusinessException("availableQty needs to be higher than 0");
         }
 
         if (!isValidQty(minPrice)) {
-            throw new BusinessException("minimum price needs to be higher than 0");
+            throw new BusinessException("minPrice needs to be higher than 0");
         }
 
         this.id = id;
