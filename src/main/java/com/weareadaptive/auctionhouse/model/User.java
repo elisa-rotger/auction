@@ -27,10 +27,10 @@ public class User implements Model {
       throw new BusinessException("password cannot be null or empty");
     }
     if (isNullOrEmpty(firstName)) {
-      throw new BusinessException("first name cannot be null or empty");
+      throw new BusinessException("firstName cannot be null or empty");
     }
     if (isNullOrEmpty(lastName)) {
-      throw new BusinessException("last name cannot be null or empty");
+      throw new BusinessException("lastName cannot be null or empty");
     }
     if (isNullOrEmpty(organisation)) {
       throw new BusinessException("organisation cannot be null or empty");

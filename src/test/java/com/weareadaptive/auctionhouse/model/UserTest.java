@@ -31,12 +31,11 @@ public class UserTest {
 
   @ParameterizedTest(name = "Create user should throw when {0} is null")
   @MethodSource("createUserArguments")
-  public void createUserShouldThrowWhenNullProperty(String propertyName,
-                                                    Executable userExecutable) {
-    //Act
+  public void createUserShouldThrowWhenNullProperty(String propertyName, Executable userExecutable) {
+    //Act - assert that the error is thrown
     var exception = assertThrows(BusinessException.class, userExecutable);
 
-    //Assert
+    //Assert - assert that the error message contains the property name
     assertTrue(exception.getMessage().contains(propertyName));
   }
 
