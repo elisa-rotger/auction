@@ -30,9 +30,6 @@ public class UserStateTest {
     state.setNextId(USER4.getId());
   }
 
-  // TODO: Add tests
-  // TODO: Add auction / auction state test
-
   @Test
   @DisplayName("findUserByUsernameAndPassword should return the correct user")
   public void shouldFindUserByUsernameAndPassword() {

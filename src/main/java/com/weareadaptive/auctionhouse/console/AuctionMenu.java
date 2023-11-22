@@ -3,6 +3,8 @@ package com.weareadaptive.auctionhouse.console;
 import com.weareadaptive.auctionhouse.model.Auction;
 import com.weareadaptive.auctionhouse.model.BusinessException;
 
+import java.util.Arrays;
+
 public class AuctionMenu extends ConsoleMenu {
     @Override
     public void display(MenuContext context) {
@@ -62,17 +64,15 @@ public class AuctionMenu extends ConsoleMenu {
         var owner = context.getCurrentUser().getUsername();
 
         // TODO: Add list of bids, if available
-        state.auctionState()
-                .stream()
-                .filter(a -> a.getOwner().equals(owner))
+        Arrays.stream(state.auctionState().findAuctionsByOwner(owner))
                 .forEach(a -> out.printf(
-                        "Symbol: %s, Minimum price: %s, Available quantity: %s || %s %n",
-                        a.getSymbol(),
-                        a.getMinPrice(),
-                        a.getAvailableQty(),
-                        a.getIsOpen() ? "(Open)" : "(Closed)"
-                        )
+                    "Symbol: %s, Minimum price: %s, Available quantity: %s || %s %n",
+                    a.getSymbol(),
+                    a.getMinPrice(),
+                    a.getAvailableQty(),
+                    a.getIsOpen() ? "(Open)" : "(Closed)")
                 );
+
 
         // TODO: Add message when no auctions have been created
 
