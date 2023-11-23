@@ -3,7 +3,7 @@ package com.weareadaptive.auctionhouse.model;
 import static com.weareadaptive.auctionhouse.IntUtil.isValidQty;
 import static com.weareadaptive.auctionhouse.StringUtil.isNullOrEmpty;
 
-public class Bid {
+public class Bid{
     private final double price;
     private final int quantity;
     private final String owner;

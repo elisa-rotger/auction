@@ -33,14 +33,32 @@ public class AuctionStateTest {
         // Returns correct auction stream
         var auctionsUser1 = state.findAuctionsByOwner(USER1.getUsername());
         Auction[] testAuctionsUser1 = {AUCTION1, AUCTION2};
-        assertArrayEquals(auctionsUser1, testAuctionsUser1);
+        assertArrayEquals(auctionsUser1.toArray(), testAuctionsUser1);
 
         var auctionsUser2 = state.findAuctionsByOwner(USER2.getUsername());
         Auction[] testAuctionsUser2 = {AUCTION3, AUCTION4};
-        assertArrayEquals(auctionsUser2, testAuctionsUser2);
+        assertArrayEquals(auctionsUser2.toArray(), testAuctionsUser2);
 
         var auctionsUser3 = state.findAuctionsByOwner(USER3.getUsername());
-        assertEquals(auctionsUser3.length, 0);
+        assertEquals(auctionsUser3.toArray().length, 0);
     }
 
+    @Test
+    @DisplayName("findWonBids should return the owner's won bids")
+    public void shouldFindWonBids() {
+        var owner = USER2.getUsername();
+        // Valid bids
+        AUCTION1.bid(owner, 26, 3);
+        AUCTION2.bid(owner, 46, 2);
+
+        // Close auctions
+        AUCTION1.closeAuction();
+        AUCTION2.closeAuction();
+
+        var wonBids = state.findWonBids(owner);
+
+        System.out.println(wonBids);
+        assertEquals(wonBids.toArray().length, 2);
+        assertEquals(wonBids.get(0).qtyWon(), 3);
+    }
 }

@@ -3,6 +3,7 @@ package com.weareadaptive.auctionhouse.model;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import static java.lang.Math.min;
 import static java.util.Collections.reverseOrder;
@@ -20,11 +21,6 @@ public class Auction implements Model {
     private final List<Bid> bidList;
     private final List<WinningBid> winningBidList;
     private AuctionSummary auctionSummary;
-
-    public int getId() {
-        return id;
-    }
-
     public Auction(int id, String owner, String symbol, double minPrice, int availableQty) {
 
         if (isNullOrEmpty(owner)) {
@@ -53,13 +49,18 @@ public class Auction implements Model {
         this.winningBidList = new ArrayList<WinningBid>();
     }
 
+    public int getId() { return id; }
     public String getOwner() { return owner; }
     public String getSymbol() { return symbol; }
     public int getAvailableQty() { return availableQty; }
     public double getMinPrice() { return minPrice; }
     public boolean getIsOpen() { return isOpen; }
     public List<Bid> getBidList() { return bidList; }
-    public List<WinningBid> getWinningBidList() { return winningBidList; }
+    public List<WinningBid> getWinningBidList(String bidder) {
+        return winningBidList.stream()
+                .filter(winningBid -> Objects.equals(winningBid.originalBid().getOwner(), bidder))
+                .toList();
+    }
     public AuctionSummary getAuctionSummary() { return auctionSummary; }
 
     public void bid(String biddingUser, double price, int quantity) {
@@ -79,6 +80,10 @@ public class Auction implements Model {
             throw new BusinessException("Bid quantity exceeds available quantity.");
         }
 
+        if (quantity < 1) {
+            throw new BusinessException("Bid quantity is too low.");
+        }
+
         // submissionTime might not be needed -> list is sorted by addition date anyway
         // Could be good to generate a timestamp in the summary though, so leaving it in for now
         bidList.add(new Bid(biddingUser, price, quantity, System.currentTimeMillis()));
@@ -88,6 +93,8 @@ public class Auction implements Model {
         return bidList.stream().sorted(reverseOrder(Comparator.comparing(Bid::getPrice))).toList();
     }
     public void closeAuction() {
+        if (!isOpen) throw new BusinessException("Cannot close an already closed auction.");
+
         this.isOpen = false;
         // Order by descending price & execution date
         var orderedBidList = orderBidList(bidList);
@@ -108,7 +115,6 @@ public class Auction implements Model {
                 winningBidList.add(new WinningBid(quantityToClose, bid));
             }
         }
-
         // Loop is done -> we have: total money won (profit), quantity left without selling in the auction (quantityLeft)
         var totalSoldQty = availableQty - quantityLeft;
         this.auctionSummary = new AuctionSummary(profit, totalSoldQty, quantityLeft, winningBidList);

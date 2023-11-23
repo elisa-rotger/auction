@@ -44,6 +44,65 @@ public class AuctionTest {
         assertTrue(exception.getMessage().contains(propertyName));
     }
 
+    // Bidding tests
+    @Test
+    @DisplayName("should throw an exception when bidding on a closed auction")
+    public void shouldThrowIfAuctionIsClosed() {
+        var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
+        auction.closeAuction();
+        var exception = assertThrows(BusinessException.class, () -> auction.bid("bidder", 22, 2));
+        assertTrue(exception.getMessage().contains("closed"));
+    }
+
+    @Test
+    @DisplayName("should throw an exception when the bidder is the auction owner")
+    public void shouldThrowIfBidderIsOwner() {
+        var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
+        var exception = assertThrows(BusinessException.class, () -> auction.bid("owner", 22, 2));
+        assertTrue(exception.getMessage().contains("Owner"));
+    }
+
+    @Test
+    @DisplayName("should throw an exception when the bidding price is below the minimum price")
+    public void shouldThrowIfPriceIsTooLow() {
+        var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
+        var exception = assertThrows(BusinessException.class, () -> auction.bid("bidder", 10.0, 2));
+        assertTrue(exception.getMessage().contains("price"));
+    }
+
+    @Test
+    @DisplayName("should throw an exception when the bidding quantity is below 1 or higher than the available quantity")
+    public void shouldThrowIfQuantityIsInvalid() {
+        var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
+
+        var lowException = assertThrows(BusinessException.class, () -> auction.bid("bidder", 22, 0));
+        assertTrue(lowException.getMessage().contains("low"));
+
+        var highException = assertThrows(BusinessException.class, () -> auction.bid("bidder", 22, 10));
+        assertTrue(highException.getMessage().contains("exceeds"));
+    }
+
+    @Test
+    @DisplayName("should be able to add a bid")
+    public void shouldAddABid() {
+        var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
+
+        auction.bid("bidder1", 22, 3);
+        auction.bid("bidder2", 23.2, 2);
+        auction.bid("bidder3", 23.5, 2);
+
+        var currentBids = auction.getBidList();
+
+        assertEquals(currentBids.get(0).getOwner(), "bidder1");
+        assertEquals(currentBids.get(0).getPrice(), 22);
+
+        assertEquals(currentBids.get(1).getOwner(), "bidder2");
+        assertEquals(currentBids.get(1).getQuantity(), 2);
+
+        assertEquals(currentBids.get(2).getOwner(), "bidder3");
+        assertEquals(currentBids.get(2).getQuantity(), 2);
+    }
+
     @Test
     @DisplayName("orderBidList should sort the existing bids by descending price order")
     public void shouldOrderBidListByPrice() {
@@ -73,4 +132,60 @@ public class AuctionTest {
 
         assertEquals(orderedList.get(0).getOwner(), "username3");
     }
+
+    // Close auction tests
+    @Test
+    @DisplayName("should throw an exception when trying to close an already closed auction")
+    public void shouldThrowWhenClosingClosedAuction() {
+        var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
+        auction.closeAuction();
+
+        var exception = assertThrows(BusinessException.class, auction::closeAuction);
+        assertTrue(exception.getMessage().contains("already closed"));
+    }
+
+    @Test
+    @DisplayName("should calculate who are the winners when closing")
+    public void shouldCalculateTheWinnersOnClose() {
+        var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
+
+        auction.bid("bidder1", 22, 3); // Should win 1
+        auction.bid("bidder2", 23.5, 2); // Should win all
+        auction.bid("bidder3", 23.2, 2); // Should win all
+        auction.bid("bidder4", 21, 2); // Should lose
+
+        auction.closeAuction();
+
+        var summary = auction.getAuctionSummary();
+
+        assertEquals(summary.soldQty(), 5); // Sold all of them
+        assertEquals(summary.remainingQty(), 0); // No remaining lots
+        assertEquals(summary.totalRevenue(), (23.5 * 2) + (23.2 * 2) + 22);
+
+        var winningBids = summary.winningBids();
+
+        assertEquals(winningBids.toArray().length, 3);
+        // First bid closed
+        assertEquals(winningBids.get(0).originalBid().getOwner(), "bidder2");
+        // Second bid closed
+        assertEquals(winningBids.get(1).originalBid().getOwner(), "bidder3");
+    }
+
+    @Test
+    @DisplayName("should close an auction partially")
+    public void shouldCloseAuctionPartially() {
+        var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
+
+        auction.bid("bidder1", 22, 1);
+        auction.bid("bidder2", 23.5, 2);
+
+        auction.closeAuction();
+
+        var summary = auction.getAuctionSummary();
+
+        assertEquals(summary.soldQty(), 3); // Sold all of them
+        assertEquals(summary.remainingQty(), 2); // No remaining lots
+        assertEquals(summary.totalRevenue(), (23.5 * 2) + 22);
+    }
+
 }
