@@ -93,14 +93,14 @@ public class AuctionTest {
 
         var currentBids = auction.getBidList();
 
-        assertEquals(currentBids.get(0).getOwner(), "bidder1");
-        assertEquals(currentBids.get(0).getPrice(), 22);
+        assertEquals(currentBids.get(0).owner(), "bidder1");
+        assertEquals(currentBids.get(0).price(), 22);
 
-        assertEquals(currentBids.get(1).getOwner(), "bidder2");
-        assertEquals(currentBids.get(1).getQuantity(), 2);
+        assertEquals(currentBids.get(1).owner(), "bidder2");
+        assertEquals(currentBids.get(1).quantity(), 2);
 
-        assertEquals(currentBids.get(2).getOwner(), "bidder3");
-        assertEquals(currentBids.get(2).getQuantity(), 2);
+        assertEquals(currentBids.get(2).owner(), "bidder3");
+        assertEquals(currentBids.get(2).quantity(), 2);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class AuctionTest {
         var auctionList = auction.getBidList();
         var orderedList = auction.orderBidList(auctionList);
 
-        assertEquals(orderedList.get(0).getOwner(), "username5");
+        assertEquals(orderedList.get(0).owner(), "username5");
     }
 
     @Test
@@ -130,7 +130,7 @@ public class AuctionTest {
         var auctionList = auction.getBidList();
         var orderedList = auction.orderBidList(auctionList);
 
-        assertEquals(orderedList.get(0).getOwner(), "username3");
+        assertEquals(orderedList.get(0).owner(), "username3");
     }
 
     // Close auction tests
@@ -166,9 +166,9 @@ public class AuctionTest {
 
         assertEquals(winningBids.toArray().length, 3);
         // First bid closed
-        assertEquals(winningBids.get(0).originalBid().getOwner(), "bidder2");
+        assertEquals(winningBids.get(0).originalBid().owner(), "bidder2");
         // Second bid closed
-        assertEquals(winningBids.get(1).originalBid().getOwner(), "bidder3");
+        assertEquals(winningBids.get(1).originalBid().owner(), "bidder3");
     }
 
     @Test

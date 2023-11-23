@@ -4,9 +4,6 @@ import com.weareadaptive.auctionhouse.model.Auction;
 import com.weareadaptive.auctionhouse.model.AuctionSummary;
 import com.weareadaptive.auctionhouse.model.BusinessException;
 
-import java.awt.*;
-import java.util.Arrays;
-
 public class AuctionMenu extends ConsoleMenu {
     @Override
     public void display(MenuContext context) {
@@ -143,19 +140,18 @@ public class AuctionMenu extends ConsoleMenu {
                 out.printf(
                         "Quantity: %s, Price: %s, Bidder: %s %n",
                         b.amount(),
-                        b.originalBid().getPrice(),
-                        b.originalBid().getOwner()
+                        b.originalBid().price(),
+                        b.originalBid().owner()
                 ));
     }
-
     private void displayBidSummary(MenuContext context, Auction auction) {
         context.getOut().println("List of bids: ---------->");
         auction.getBidList()
                 .forEach(b -> context.getOut().printf(
                     "Quantity: %s, Price: %s, Bidder: %s %n",
-                    b.getQuantity(),
-                    b.getPrice(),
-                    b.getOwner()));
+                    b.quantity(),
+                    b.price(),
+                    b.owner()));
     }
     private void viewWonBids(MenuContext context) {
         context.getState()

@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-// TODO: Can I use the same state class to generate an auction state?
-// First I'd need an Auction object, like the User
 public class State<T extends Model> {
   public static final String ITEM_ALREADY_EXISTS = "Item already exists";
   // We keep our state stored in a map - collection of key-value pairs

@@ -58,7 +58,7 @@ public class Auction implements Model {
     public List<Bid> getBidList() { return bidList; }
     public List<WinningBid> getWinningBidList(String bidder) {
         return winningBidList.stream()
-                .filter(winningBid -> Objects.equals(winningBid.originalBid().getOwner(), bidder))
+                .filter(winningBid -> Objects.equals(winningBid.originalBid().owner(), bidder))
                 .toList();
     }
     public AuctionSummary getAuctionSummary() { return auctionSummary; }
@@ -90,7 +90,7 @@ public class Auction implements Model {
     }
 
     List<Bid> orderBidList(List<Bid> originalBidList) {
-        return bidList.stream().sorted(reverseOrder(Comparator.comparing(Bid::getPrice))).toList();
+        return bidList.stream().sorted(reverseOrder(Comparator.comparing(Bid::price))).toList();
     }
     public void closeAuction() {
         if (!isOpen) throw new BusinessException("Cannot close an already closed auction.");
@@ -105,9 +105,9 @@ public class Auction implements Model {
         for (Bid bid : orderedBidList) {
             if (quantityLeft > 0) {
                 // Quantity -> either the quantity left in the auction, or the bidding quantity, whichever is lower
-                var quantityToClose = min(quantityLeft, bid.getQuantity());
+                var quantityToClose = min(quantityLeft, bid.quantity());
                 // Add money won by bid to total profit
-                profit = profit + (quantityToClose * bid.getPrice());
+                profit = profit + (quantityToClose * bid.price());
                 // Decrease quantity left on the auction
                 quantityLeft = quantityLeft - quantityToClose;
 

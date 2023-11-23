@@ -1,11 +1,8 @@
 package com.weareadaptive.auctionhouse.console;
 
 import com.weareadaptive.auctionhouse.StringUtil;
-import com.weareadaptive.auctionhouse.model.Auction;
 import com.weareadaptive.auctionhouse.model.BusinessException;
 import com.weareadaptive.auctionhouse.model.User;
-
-import java.sql.Array;
 
 public class UserMenu extends ConsoleMenu {
 
@@ -25,14 +22,12 @@ public class UserMenu extends ConsoleMenu {
     private void createUser(MenuContext context) {
         var out = context.getOut();
         var scanner = context.getScanner();
-        var state = context.getState();
 
-        // Why does it not blow up if I wrap the whole thing with the try / catch, but it does if I only wrap the add?
         try {
             out.println("Enter the username:");
             final var username = scanner.nextLine();
 
-            var usernameExists = state.userState().doesUsernameExist(username);
+            var usernameExists = context.getState().userState().doesUsernameExist(username);
 
             if (usernameExists) {
                 out.println("Username already exists");
@@ -69,42 +64,35 @@ public class UserMenu extends ConsoleMenu {
             var organization = scanner.nextLine();
 
             var newUser = new User(
-                    state.userState().nextId(),
+                    context.getState().userState().nextId(),
                     username,
                     password,
                     firstName,
                     lastName,
                     organization
             );
-            state.userState().add(newUser);
+            context.getState().userState().add(newUser);
         } catch(BusinessException businessException) {
             out.println("Cannot create user.");
             out.println(businessException.getMessage());
         }
     }
-
     private void getAllUsers(MenuContext context) {
-        var out = context.getOut();
-        var scanner = context.getScanner();
-        out.println("All users ---------->");
-
-        // TODO: How should this be formatted?
-        // It kinda looks like rxjs, that's fun
+        context.getOut().println("All users ---------->");
         context.getState()
                 .userState()
                 .stream()
                 .forEach(user ->
-                        out.printf("Username: %s, Firstname: %s, Lastname: %s, Organisation: %s%n",
+                        context.getOut().printf("Username: %s, Firstname: %s, Lastname: %s, Organisation: %s, Blocked: %s%n",
                                 user.getUsername(),
                                 user.getFirstName(),
                                 user.getLastName(),
-                                user.getOrganisation()
+                                user.getOrganisation(),
+                                user.getIsBlocked() ? "Yes" : "No"
                         )
                 );
-
         pressEnter(context);
     }
-
     private void getAllOrganisations(MenuContext context) {
         var out = context.getOut();
         out.println("Organisations ---------->");
@@ -119,7 +107,6 @@ public class UserMenu extends ConsoleMenu {
 
         pressEnter(context);
     }
-
     private void getUserDetails(MenuContext context) {
         var out = context.getOut();
 
@@ -128,27 +115,38 @@ public class UserMenu extends ConsoleMenu {
                 .stream()
                 .map(u ->
                         option(u.getUsername(), () -> out.printf(
-                                "Username: %s, %nFirst Name: %s, %nLast Name: %s, %nOrganisation: %s %n",
+                                "Username: %s, %nFirst Name: %s, %nLast Name: %s, %nOrganisation: %s, Blocked: %s%n",
                                 u.getUsername(),
                                 u.getFirstName(),
                                 u.getLastName(),
-                                u.getOrganisation()
+                                u.getOrganisation(),
+                                u.getIsBlocked() ? "Yes" : "No"
                         )))
                 .toArray(MenuOption[]::new);
-
-        var allOptions = append(userOptions, leave("Go Back"));
-
         createMenu(
                 context,
-                allOptions
+                append(userOptions, leave("Go Back"))
         );
-
         pressEnter(context);
     }
+    private void blockUser(MenuContext context) {
+        context.getOut().println("Chose user to block or unblock ---------->");
 
-    // TODO: Block / unblock user
-    private void blockUser (MenuContext context) {
-        var out = context.getOut();
-        out.println("Test function");
+        var userOptions = context.getState()
+                .userState()
+                .stream()
+                .filter(u -> !u.equals(context.getCurrentUser()))
+                .map(user -> option(user.getUsername() + (user.getIsBlocked() ? " (Blocked)" : ""), () -> {
+                    user.toggleBlocked();
+                    context.getOut().printf("User blocked: %s %n", user.getUsername());
+                    pressEnter(context);
+                }))
+                .toArray(MenuOption[]::new);
+
+        // TODO: Blocking a user and rendering the menu again doesn't update the 'blocked' status right away
+        createMenu(
+                context,
+                append(userOptions, leave("Go Back"))
+        );
     }
 }

@@ -10,6 +10,7 @@ public class User implements Model {
   private final String lastName;
   private final String organisation;
   private final boolean isAdmin;
+  private boolean isBlocked = false;
 
   // For default users - no need to pass isAdmin, it will be automatically false
   public User(int id, String username, String password, String firstName, String lastName,
@@ -77,5 +78,9 @@ public class User implements Model {
 
   public boolean isAdmin() {
     return isAdmin;
+  }
+  public boolean getIsBlocked() { return isBlocked; }
+  public void toggleBlocked() {
+    this.isBlocked = !isBlocked;
   }
 }

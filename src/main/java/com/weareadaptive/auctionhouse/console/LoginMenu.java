@@ -35,6 +35,11 @@ public class LoginMenu extends ConsoleMenu {
         .userState()
         .findUserByUsernameAndPassword(username, password)
         .ifPresentOrElse(user -> {
+          if (user.getIsBlocked()) {
+              out.printf("User %s has been blocked. %n", user.getUsername());
+              pressEnter(context);
+              return;
+          }
           context.setCurrentUser(user);
           out.printf("Welcome %s %s %n", user.getFirstName(), user.getLastName());
           // TODO: There is a bug here - even if the option is not displayed, the user can still select the option 1 and go to user management menu

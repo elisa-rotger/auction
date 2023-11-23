@@ -30,8 +30,8 @@ public class AuctionState extends State<Auction> {
                                 auction.getId(),
                                 auction.getSymbol(),
                                 winningBid.amount(),
-                                winningBid.originalBid().getQuantity(),
-                                winningBid.originalBid().getPrice())))
+                                winningBid.originalBid().quantity(),
+                                winningBid.originalBid().price())))
                 .toList();
     }
 }
