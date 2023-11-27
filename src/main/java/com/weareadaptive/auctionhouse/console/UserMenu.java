@@ -115,7 +115,7 @@ public class UserMenu extends ConsoleMenu {
                 .stream()
                 .map(u ->
                         option(u.getUsername(), () -> out.printf(
-                                "Username: %s, %nFirst Name: %s, %nLast Name: %s, %nOrganisation: %s, Blocked: %s%n",
+                                "Username: %s %nFirst Name: %s %nLast Name: %s %nOrganisation: %s Blocked: %s%n",
                                 u.getUsername(),
                                 u.getFirstName(),
                                 u.getLastName(),
@@ -127,7 +127,6 @@ public class UserMenu extends ConsoleMenu {
                 context,
                 append(userOptions, leave("Go Back"))
         );
-        pressEnter(context);
     }
     private void blockUser(MenuContext context) {
         context.getOut().println("Chose user to block or unblock ---------->");

@@ -24,14 +24,7 @@ public class AuctionState extends State<Auction> {
     public List<WonBid> findWonBids(String owner) {
         return stream()
                 .filter(auction -> !auction.getIsOpen())
-                .flatMap(auction -> auction.getWinningBidList(owner)
-                        .stream()
-                        .map(winningBid -> new WonBid(
-                                auction.getId(),
-                                auction.getSymbol(),
-                                winningBid.amount(),
-                                winningBid.originalBid().quantity(),
-                                winningBid.originalBid().price())))
+                .flatMap(auction -> auction.getWinningBidList(owner))
                 .toList();
     }
 }

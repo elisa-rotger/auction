@@ -4,6 +4,8 @@ import com.weareadaptive.auctionhouse.model.Auction;
 import com.weareadaptive.auctionhouse.model.AuctionSummary;
 import com.weareadaptive.auctionhouse.model.BusinessException;
 
+import java.math.BigDecimal;
+
 public class AuctionMenu extends ConsoleMenu {
     @Override
     public void display(MenuContext context) {
@@ -87,7 +89,7 @@ public class AuctionMenu extends ConsoleMenu {
                         () -> {
                             try {
                                 out.println("Input price (per lot) to bid:");
-                                final var price = Double.parseDouble(context.getScanner().nextLine());
+                                final var price = context.getScanner().nextBigDecimal();
 
                                 out.println("Enter the bid quantity:");
                                 final var quantity = Integer.parseInt(context.getScanner().nextLine());
@@ -139,9 +141,9 @@ public class AuctionMenu extends ConsoleMenu {
         summary.winningBids().forEach(b ->
                 out.printf(
                         "Quantity: %s, Price: %s, Bidder: %s %n",
-                        b.amount(),
-                        b.originalBid().price(),
-                        b.originalBid().owner()
+                        b.qtyWon(),
+                        b.pricePerLot(),
+                        b.bidder()
                 ));
     }
     private void displayBidSummary(MenuContext context, Auction auction) {

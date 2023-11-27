@@ -1,8 +1,8 @@
 package com.weareadaptive.auctionhouse.model;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.weareadaptive.auctionhouse.TestData.USER2;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
@@ -63,5 +63,16 @@ public class UserTest {
 
     //Assert
     assertTrue(result);
+  }
+
+  @Test
+  @DisplayName("toggleBlocked should switch between isBlocked true / false values")
+  public void shouldToggleBlockedState() {
+    // Is false by default when they are created
+    var user = new User(1, "user", "password", "Jonh", "Doe", "Adaptive");
+    assertFalse(user.getIsBlocked());
+
+    user.toggleBlocked();
+    assertTrue(user.getIsBlocked());
   }
 }

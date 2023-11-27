@@ -5,6 +5,7 @@ public class Parser {
   private Parser() {
   }
 
+  // checked exception vs unchecked exceptions
   public static int parseInt(String value, String property) throws ParsingException {
     try {
       return Integer.parseInt(value);

@@ -37,14 +37,16 @@ public abstract class ConsoleMenu {
     var scanner = context.getScanner();
     var out = context.getOut();
 
+    var finalOptions = Arrays.stream(options)
+            .filter(option -> option.isDisplayed.test(context))
+            .toArray(MenuOption[]::new);
+
     var success = false;
     while (!success) {
       out.println("===================================");
-      for (var i = 1; i <= options.length; i++) {
-        var option = options[i - 1];
-        if (option.isDisplayed.test(context)) {
-          out.printf("%s. %s %n", i, option.title);
-        }
+      for (var i = 1; i <= finalOptions.length; i++) {
+        var option = finalOptions[i - 1];
+        out.printf("%s. %s %n", i, option.title);
       }
       out.println("===================================");
       out.print("Enter your option: ");
@@ -52,9 +54,9 @@ public abstract class ConsoleMenu {
       try {
         var rawOption = scanner.nextLine();
         var option = Integer.parseInt(rawOption);
-        if (option > 0 && option <= options.length) {
-          options[option - 1].action.accept(context);
-          success = options[option - 1].leave;
+        if (option > 0 && option <= finalOptions.length) {
+          finalOptions[option - 1].action.accept(context);
+          success = finalOptions[option - 1].leave;
         } else {
           invalidOption = true;
         }

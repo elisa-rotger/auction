@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.math.BigDecimal;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,7 +51,7 @@ public class AuctionTest {
     public void shouldThrowIfAuctionIsClosed() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
         auction.closeAuction();
-        var exception = assertThrows(BusinessException.class, () -> auction.bid("bidder", 22, 2));
+        var exception = assertThrows(BusinessException.class, () -> auction.bid("bidder", BigDecimal.valueOf(22), 2));
         assertTrue(exception.getMessage().contains("closed"));
     }
 
@@ -58,7 +59,7 @@ public class AuctionTest {
     @DisplayName("should throw an exception when the bidder is the auction owner")
     public void shouldThrowIfBidderIsOwner() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
-        var exception = assertThrows(BusinessException.class, () -> auction.bid("owner", 22, 2));
+        var exception = assertThrows(BusinessException.class, () -> auction.bid("owner", BigDecimal.valueOf(22), 2));
         assertTrue(exception.getMessage().contains("Owner"));
     }
 
@@ -66,7 +67,7 @@ public class AuctionTest {
     @DisplayName("should throw an exception when the bidding price is below the minimum price")
     public void shouldThrowIfPriceIsTooLow() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
-        var exception = assertThrows(BusinessException.class, () -> auction.bid("bidder", 10.0, 2));
+        var exception = assertThrows(BusinessException.class, () -> auction.bid("bidder", BigDecimal.valueOf(10), 2));
         assertTrue(exception.getMessage().contains("price"));
     }
 
@@ -75,10 +76,10 @@ public class AuctionTest {
     public void shouldThrowIfQuantityIsInvalid() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
 
-        var lowException = assertThrows(BusinessException.class, () -> auction.bid("bidder", 22, 0));
+        var lowException = assertThrows(BusinessException.class, () -> auction.bid("bidder", BigDecimal.valueOf(22), 0));
         assertTrue(lowException.getMessage().contains("low"));
 
-        var highException = assertThrows(BusinessException.class, () -> auction.bid("bidder", 22, 10));
+        var highException = assertThrows(BusinessException.class, () -> auction.bid("bidder", BigDecimal.valueOf(22), 10));
         assertTrue(highException.getMessage().contains("exceeds"));
     }
 
@@ -87,14 +88,14 @@ public class AuctionTest {
     public void shouldAddABid() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
 
-        auction.bid("bidder1", 22, 3);
-        auction.bid("bidder2", 23.2, 2);
-        auction.bid("bidder3", 23.5, 2);
+        auction.bid("bidder1", BigDecimal.valueOf(22), 3);
+        auction.bid("bidder2", BigDecimal.valueOf(23.2), 2);
+        auction.bid("bidder3", BigDecimal.valueOf(23.5), 2);
 
         var currentBids = auction.getBidList();
 
         assertEquals(currentBids.get(0).owner(), "bidder1");
-        assertEquals(currentBids.get(0).price(), 22);
+        assertEquals(currentBids.get(0).price(), BigDecimal.valueOf(22));
 
         assertEquals(currentBids.get(1).owner(), "bidder2");
         assertEquals(currentBids.get(1).quantity(), 2);
@@ -107,13 +108,12 @@ public class AuctionTest {
     @DisplayName("orderBidList should sort the existing bids by descending price order")
     public void shouldOrderBidListByPrice() {
         var auction = new Auction(1, "username", "AAPL", 20.5, 5);
-        auction.bid("username2", 22, 2);
-        auction.bid("username3", 24, 3);
-        auction.bid("username4", 21, 3);
-        auction.bid("username5", 26, 3);
+        auction.bid("username2", BigDecimal.valueOf(22), 2);
+        auction.bid("username3", BigDecimal.valueOf(24), 3);
+        auction.bid("username4", BigDecimal.valueOf(21), 3);
+        auction.bid("username5", BigDecimal.valueOf(26), 3);
 
-        var auctionList = auction.getBidList();
-        var orderedList = auction.orderBidList(auctionList);
+        var orderedList = auction.orderBidList();
 
         assertEquals(orderedList.get(0).owner(), "username5");
     }
@@ -122,13 +122,12 @@ public class AuctionTest {
     @DisplayName("orderBidList should sort the existing bids by earliest execution date when price is matched")
     public void shouldOrderBidListByDate() {
         var auction = new Auction(1, "username", "AAPL", 20.5, 5);
-        auction.bid("username2", 22, 2);
-        auction.bid("username3", 26, 3);
-        auction.bid("username4", 21, 3);
-        auction.bid("username5", 26, 3);
+        auction.bid("username2", BigDecimal.valueOf(22), 2);
+        auction.bid("username3", BigDecimal.valueOf(26), 3);
+        auction.bid("username4", BigDecimal.valueOf(21), 3);
+        auction.bid("username5", BigDecimal.valueOf(26), 3);
 
-        var auctionList = auction.getBidList();
-        var orderedList = auction.orderBidList(auctionList);
+        var orderedList = auction.orderBidList();
 
         assertEquals(orderedList.get(0).owner(), "username3");
     }
@@ -149,10 +148,10 @@ public class AuctionTest {
     public void shouldCalculateTheWinnersOnClose() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
 
-        auction.bid("bidder1", 22, 3); // Should win 1
-        auction.bid("bidder2", 23.5, 2); // Should win all
-        auction.bid("bidder3", 23.2, 2); // Should win all
-        auction.bid("bidder4", 21, 2); // Should lose
+        auction.bid("bidder1", BigDecimal.valueOf(22), 3); // Should win 1
+        auction.bid("bidder2", BigDecimal.valueOf(23.5), 2); // Should win all
+        auction.bid("bidder3", BigDecimal.valueOf(23.2), 2); // Should win all
+        auction.bid("bidder4", BigDecimal.valueOf(21), 2); // Should lose
 
         auction.closeAuction();
 
@@ -160,15 +159,15 @@ public class AuctionTest {
 
         assertEquals(summary.soldQty(), 5); // Sold all of them
         assertEquals(summary.remainingQty(), 0); // No remaining lots
-        assertEquals(summary.totalRevenue(), (23.5 * 2) + (23.2 * 2) + 22);
+        assertEquals(summary.totalRevenue(), BigDecimal.valueOf((23.5 * 2) + (23.2 * 2) + 22));
 
         var winningBids = summary.winningBids();
 
         assertEquals(winningBids.toArray().length, 3);
         // First bid closed
-        assertEquals(winningBids.get(0).originalBid().owner(), "bidder2");
+        assertEquals(winningBids.get(0).bidder(), "bidder2");
         // Second bid closed
-        assertEquals(winningBids.get(1).originalBid().owner(), "bidder3");
+        assertEquals(winningBids.get(1).bidder(), "bidder3");
     }
 
     @Test
@@ -176,8 +175,8 @@ public class AuctionTest {
     public void shouldCloseAuctionPartially() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
 
-        auction.bid("bidder1", 22, 1);
-        auction.bid("bidder2", 23.5, 2);
+        auction.bid("bidder1", BigDecimal.valueOf(22), 1);
+        auction.bid("bidder2", BigDecimal.valueOf(23.5), 2);
 
         auction.closeAuction();
 
@@ -185,7 +184,7 @@ public class AuctionTest {
 
         assertEquals(summary.soldQty(), 3); // Sold all of them
         assertEquals(summary.remainingQty(), 2); // No remaining lots
-        assertEquals(summary.totalRevenue(), (23.5 * 2) + 22);
+        assertEquals(summary.totalRevenue(), BigDecimal.valueOf((23.5 * 2) + 22));
     }
 
 }

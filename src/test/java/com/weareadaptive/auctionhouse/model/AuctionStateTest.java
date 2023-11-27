@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.stream.Stream;
 
 import static com.weareadaptive.auctionhouse.TestData.*;
@@ -48,8 +49,8 @@ public class AuctionStateTest {
     public void shouldFindWonBids() {
         var owner = USER2.getUsername();
         // Valid bids
-        AUCTION1.bid(owner, 26, 3);
-        AUCTION2.bid(owner, 46, 2);
+        AUCTION1.bid(owner, BigDecimal.valueOf(26), 3);
+        AUCTION2.bid(owner, BigDecimal.valueOf(46), 2);
 
         // Close auctions
         AUCTION1.closeAuction();
@@ -57,7 +58,6 @@ public class AuctionStateTest {
 
         var wonBids = state.findWonBids(owner);
 
-        System.out.println(wonBids);
         assertEquals(wonBids.toArray().length, 2);
         assertEquals(wonBids.get(0).qtyWon(), 3);
     }
