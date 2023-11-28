@@ -4,7 +4,7 @@ import com.weareadaptive.auctionhouse.model.Auction;
 import com.weareadaptive.auctionhouse.model.AuctionSummary;
 import com.weareadaptive.auctionhouse.model.BusinessException;
 
-import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 
 public class AuctionMenu extends ConsoleMenu {
     @Override
@@ -16,14 +16,9 @@ public class AuctionMenu extends ConsoleMenu {
                 option("View my auctions", this::listOwnAuctions),
                 option("Bid on an auction", this::createBid),
                 option("View bids won", this::viewWonBids),
-                // TODO: Lost bids
-                option("View bids lost", this::testFn),
+                option("View bids lost", this::viewLostBids),
                 leave("Go Back")
         );
-    }
-
-    private void testFn(MenuContext context) {
-        context.getOut().println("Test function");
     }
     private void createAuction(MenuContext context) {
         var out = context.getOut();
@@ -37,21 +32,20 @@ public class AuctionMenu extends ConsoleMenu {
             final var symbol = scanner.nextLine();
 
             out.println("Enter the available quantity:");
-            final var availableQty = Integer.parseInt(scanner.nextLine());
+            final var availableQty = Parser.parseInt(scanner.nextLine(), "availableQty");
 
             out.println("Enter the minimum price:");
-            final var minPrice = Double.parseDouble(scanner.nextLine());
+            final var minPrice = Parser.parseDouble(scanner.nextLine(), "minPrice");
 
             var newAuction = new Auction(auctionState.nextId(), owner, symbol, minPrice, availableQty);
             auctionState.add(newAuction);
 
             out.printf("Auction with id %s has been added. Symbol: %s %n", newAuction.getId(), newAuction.getSymbol());
             pressEnter(context);
-        } catch(BusinessException businessException) {
+        } catch(BusinessException | ParsingException exception) {
             out.println("Cannot create auction.");
-            out.println(businessException.getMessage());
+            out.println(exception.getMessage());
         }
-
     }
     private void listOwnAuctions(MenuContext context) {
         context.getState()
@@ -89,18 +83,18 @@ public class AuctionMenu extends ConsoleMenu {
                         () -> {
                             try {
                                 out.println("Input price (per lot) to bid:");
-                                final var price = context.getScanner().nextBigDecimal();
+                                final var price = Parser.parseDouble(context.getScanner().nextLine(), "price");
 
                                 out.println("Enter the bid quantity:");
-                                final var quantity = Integer.parseInt(context.getScanner().nextLine());
+                                final var quantity = Parser.parseInt(context.getScanner().nextLine(), "quantity");
 
                                 auction.bid(bidder, price, quantity);
 
                                 out.println("Bid created!");
                                 pressEnter(context);
-                            } catch(BusinessException businessException) {
+                            } catch(BusinessException | ParsingException exception) {
                                 out.println("Cannot create bid.");
-                                out.println(businessException.getMessage());
+                                out.println(exception.getMessage());
                             }
                         }))
                 .toArray(MenuOption[]::new);
@@ -129,13 +123,15 @@ public class AuctionMenu extends ConsoleMenu {
     }
     private void displayAuctionSummary(MenuContext context, AuctionSummary summary) {
         var out = context.getOut();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 
         out.println("Summary of closed auction: ---------->");
         out.printf(
-                "Total revenue: %s, Sold quantity: %s, Remaining quantity: %s %n",
+                "Total revenue: %s, Sold quantity: %s, Remaining quantity: %s, Closing time: %s%n",
                 summary.totalRevenue(),
                 summary.soldQty(),
-                summary.remainingQty()
+                summary.remainingQty(),
+                dateFormatter.format(summary.closingTime())
         );
         out.println("List of winning bids: ---------->");
         summary.winningBids().forEach(b ->
@@ -159,14 +155,29 @@ public class AuctionMenu extends ConsoleMenu {
         context.getState()
                 .auctionState()
                 .findWonBids(context.getCurrentUser().getUsername())
-                .forEach(bidWon -> context.getOut()
-                        .printf("Auction ID: %s, Symbol: %s, Quantity bought: %s, Price: %s %n",
-                                bidWon.AuctionId(),
-                                bidWon.symbol(),
-                                bidWon.qtyWon(),
-                                bidWon.pricePerLot()
-                            )
+                .forEach(bidWon -> {
+                    context.getOut().println("Won bids ------->");
+                    context.getOut()
+                            .printf("Auction ID: %s, Symbol: %s, Quantity bought: %s, Price: %s %n",
+                                    bidWon.AuctionId(),
+                                    bidWon.symbol(),
+                                    bidWon.qtyWon(),
+                                    bidWon.pricePerLot()
+                            );
+                    });
+    }
+    private void viewLostBids(MenuContext context) {
+        context.getState()
+                .auctionState()
+                .findLostBids(context.getCurrentUser().getUsername())
+                .forEach(lostBid -> {
+                        context.getOut().println("Lost bids ------->");
+                        context.getOut().printf("Auction ID: %s, Symbol: %s, Quantity: %s, Price: %s%n",
+                                lostBid.AuctionId(),
+                                lostBid.symbol(),
+                                lostBid.quantityLeft(),
+                                lostBid.pricePerLot());
+                    }
                 );
-
     }
 }

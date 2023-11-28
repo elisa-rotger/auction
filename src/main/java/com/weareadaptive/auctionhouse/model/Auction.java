@@ -1,11 +1,11 @@
 package com.weareadaptive.auctionhouse.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.BaseStream;
 import java.util.stream.Stream;
 
 import static java.lang.Math.min;
@@ -18,7 +18,7 @@ public class Auction implements Model {
     private final int id;
     private final String owner;
     private final String symbol;
-    private final BigDecimal minPrice;
+    private final double minPrice;
     private final int availableQty;
     private boolean isOpen;
     private final List<Bid> bidList;
@@ -45,7 +45,7 @@ public class Auction implements Model {
         this.id = id;
         this.owner = owner;
         this.symbol = symbol;
-        this.minPrice = BigDecimal.valueOf(minPrice);
+        this.minPrice = minPrice;
         this.availableQty = availableQty;
         this.isOpen = true;
         this.bidList = new ArrayList<>();
@@ -56,7 +56,7 @@ public class Auction implements Model {
     public String getOwner() { return owner; }
     public String getSymbol() { return symbol; }
     public int getAvailableQty() { return availableQty; }
-    public BigDecimal getMinPrice() { return minPrice; }
+    public double getMinPrice() { return minPrice; }
     public boolean getIsOpen() { return isOpen; }
     public List<Bid> getBidList() { return bidList; }
     public Stream<WonBid> getWinningBidList(String bidder) {
@@ -65,7 +65,7 @@ public class Auction implements Model {
     }
     public AuctionSummary getAuctionSummary() { return auctionSummary; }
 
-    public void bid(String biddingUser, BigDecimal price, int quantity) {
+    public void bid(String biddingUser, double price, int quantity) {
         if (!isOpen) {
             throw new BusinessException("Cannot bid on a closed auction.");
         }
@@ -74,7 +74,7 @@ public class Auction implements Model {
             throw new BusinessException("Owner cannot bid on their own auction.");
         }
 
-        if (price.min(minPrice).equals(price)) {
+        if (price < minPrice) {
             throw new BusinessException("Price is inferior to minimum price set.");
         }
 
@@ -111,16 +111,26 @@ public class Auction implements Model {
                 // Quantity -> either the quantity left in the auction, or the bidding quantity, whichever is lower
                 int quantityToClose = min(quantityLeft, bid.quantity());
                 // Add money won by bid to total profit
-                profit = profit.add(bid.price().multiply(BigDecimal.valueOf(quantityToClose)));
+                profit = profit.add(BigDecimal.valueOf(bid.price()).multiply(BigDecimal.valueOf(quantityToClose)));
                 // Decrease quantity left on the auction
                 quantityLeft = quantityLeft - quantityToClose;
 
                 // Add executed bid to the winning bid list
-                winningBidList.add(new WonBid(id, symbol, quantityToClose, bid.quantity(), bid.price(), bid.owner()));
+                winningBidList.add(new WonBid(id, symbol, quantityToClose, bid.quantity(), bid.price(), bid.owner(), bid));
             }
         }
         // Loop is done -> we have: total money won (profit), quantity left without selling in the auction (quantityLeft)
         var totalSoldQty = availableQty - quantityLeft;
-        this.auctionSummary = new AuctionSummary(profit, totalSoldQty, quantityLeft, winningBidList);
+        this.auctionSummary = new AuctionSummary(profit, totalSoldQty, quantityLeft, LocalDateTime.now(), winningBidList);
+    }
+    public Stream<LostBid> getLostBids(String owner) {
+        return bidList
+                .stream()
+                .filter(bid -> bid.owner().equals(owner) &&
+                        auctionSummary
+                                .winningBids()
+                                .stream()
+                                .noneMatch(winningBid -> winningBid.originalBid().equals(bid)))
+                .map(bid -> new LostBid(id, symbol, bid.quantity(), bid.price(), owner));
     }
 }

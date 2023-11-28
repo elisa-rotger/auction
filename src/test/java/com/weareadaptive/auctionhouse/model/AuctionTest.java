@@ -51,7 +51,7 @@ public class AuctionTest {
     public void shouldThrowIfAuctionIsClosed() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
         auction.closeAuction();
-        var exception = assertThrows(BusinessException.class, () -> auction.bid("bidder", BigDecimal.valueOf(22), 2));
+        var exception = assertThrows(BusinessException.class, () -> auction.bid("bidder",22, 2));
         assertTrue(exception.getMessage().contains("closed"));
     }
 
@@ -59,7 +59,7 @@ public class AuctionTest {
     @DisplayName("should throw an exception when the bidder is the auction owner")
     public void shouldThrowIfBidderIsOwner() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
-        var exception = assertThrows(BusinessException.class, () -> auction.bid("owner", BigDecimal.valueOf(22), 2));
+        var exception = assertThrows(BusinessException.class, () -> auction.bid("owner",22, 2));
         assertTrue(exception.getMessage().contains("Owner"));
     }
 
@@ -67,7 +67,7 @@ public class AuctionTest {
     @DisplayName("should throw an exception when the bidding price is below the minimum price")
     public void shouldThrowIfPriceIsTooLow() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
-        var exception = assertThrows(BusinessException.class, () -> auction.bid("bidder", BigDecimal.valueOf(10), 2));
+        var exception = assertThrows(BusinessException.class, () -> auction.bid("bidder",10, 2));
         assertTrue(exception.getMessage().contains("price"));
     }
 
@@ -76,10 +76,10 @@ public class AuctionTest {
     public void shouldThrowIfQuantityIsInvalid() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
 
-        var lowException = assertThrows(BusinessException.class, () -> auction.bid("bidder", BigDecimal.valueOf(22), 0));
+        var lowException = assertThrows(BusinessException.class, () -> auction.bid("bidder",22, 0));
         assertTrue(lowException.getMessage().contains("low"));
 
-        var highException = assertThrows(BusinessException.class, () -> auction.bid("bidder", BigDecimal.valueOf(22), 10));
+        var highException = assertThrows(BusinessException.class, () -> auction.bid("bidder",22, 10));
         assertTrue(highException.getMessage().contains("exceeds"));
     }
 
@@ -88,14 +88,14 @@ public class AuctionTest {
     public void shouldAddABid() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
 
-        auction.bid("bidder1", BigDecimal.valueOf(22), 3);
-        auction.bid("bidder2", BigDecimal.valueOf(23.2), 2);
-        auction.bid("bidder3", BigDecimal.valueOf(23.5), 2);
+        auction.bid("bidder1",22, 3);
+        auction.bid("bidder2",23.2, 2);
+        auction.bid("bidder3",23.5, 2);
 
         var currentBids = auction.getBidList();
 
         assertEquals(currentBids.get(0).owner(), "bidder1");
-        assertEquals(currentBids.get(0).price(), BigDecimal.valueOf(22));
+        assertEquals(currentBids.get(0).price(),22);
 
         assertEquals(currentBids.get(1).owner(), "bidder2");
         assertEquals(currentBids.get(1).quantity(), 2);
@@ -108,10 +108,10 @@ public class AuctionTest {
     @DisplayName("orderBidList should sort the existing bids by descending price order")
     public void shouldOrderBidListByPrice() {
         var auction = new Auction(1, "username", "AAPL", 20.5, 5);
-        auction.bid("username2", BigDecimal.valueOf(22), 2);
-        auction.bid("username3", BigDecimal.valueOf(24), 3);
-        auction.bid("username4", BigDecimal.valueOf(21), 3);
-        auction.bid("username5", BigDecimal.valueOf(26), 3);
+        auction.bid("username2",22, 2);
+        auction.bid("username3",24, 3);
+        auction.bid("username4",21, 3);
+        auction.bid("username5",26, 3);
 
         var orderedList = auction.orderBidList();
 
@@ -122,10 +122,10 @@ public class AuctionTest {
     @DisplayName("orderBidList should sort the existing bids by earliest execution date when price is matched")
     public void shouldOrderBidListByDate() {
         var auction = new Auction(1, "username", "AAPL", 20.5, 5);
-        auction.bid("username2", BigDecimal.valueOf(22), 2);
-        auction.bid("username3", BigDecimal.valueOf(26), 3);
-        auction.bid("username4", BigDecimal.valueOf(21), 3);
-        auction.bid("username5", BigDecimal.valueOf(26), 3);
+        auction.bid("username2",22, 2);
+        auction.bid("username3",26, 3);
+        auction.bid("username4",21, 3);
+        auction.bid("username5",26, 3);
 
         var orderedList = auction.orderBidList();
 
@@ -148,10 +148,10 @@ public class AuctionTest {
     public void shouldCalculateTheWinnersOnClose() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
 
-        auction.bid("bidder1", BigDecimal.valueOf(22), 3); // Should win 1
-        auction.bid("bidder2", BigDecimal.valueOf(23.5), 2); // Should win all
-        auction.bid("bidder3", BigDecimal.valueOf(23.2), 2); // Should win all
-        auction.bid("bidder4", BigDecimal.valueOf(21), 2); // Should lose
+        auction.bid("bidder1",22, 3); // Should win 1
+        auction.bid("bidder2",23.5, 2); // Should win all
+        auction.bid("bidder3",23.2, 2); // Should win all
+        auction.bid("bidder4",21, 2); // Should lose
 
         auction.closeAuction();
 
@@ -175,8 +175,8 @@ public class AuctionTest {
     public void shouldCloseAuctionPartially() {
         var auction = new Auction(1, "owner", "AAPL", 20.0, 5);
 
-        auction.bid("bidder1", BigDecimal.valueOf(22), 1);
-        auction.bid("bidder2", BigDecimal.valueOf(23.5), 2);
+        auction.bid("bidder1",22, 1);
+        auction.bid("bidder2",23.5, 2);
 
         auction.closeAuction();
 
@@ -187,4 +187,25 @@ public class AuctionTest {
         assertEquals(summary.totalRevenue(), BigDecimal.valueOf((23.5 * 2) + 22));
     }
 
+    @Test
+    @DisplayName("should show correct lost bids")
+    public void shouldShowLostBids() {
+        var auction = new Auction(1, "owner", "AAPL", 20.0, 2);
+
+        auction.bid("bidder1",21, 2); // Lose
+        auction.bid("bidder1",22, 1); // Win
+        auction.bid("bidder2",23.5, 1); // Win
+
+        auction.closeAuction();
+
+        var lostBidsBidder1 = auction.getLostBids("bidder1").toList();
+        var lostBidsBidder2 = auction.getLostBids("bidder2").toList();
+
+        assertEquals(lostBidsBidder2.toArray().length, 0); // No lost bids - won all of them
+
+        assertEquals(lostBidsBidder1.toArray().length, 1); // One lost bid
+        assertEquals(lostBidsBidder1.get(0).AuctionId(), auction.getId());
+        assertEquals(lostBidsBidder1.get(0).pricePerLot(), 21);
+        assertEquals(lostBidsBidder1.get(0).quantityLeft(), 2);
+    }
 }

@@ -3,6 +3,7 @@ package com.weareadaptive.auctionhouse.model;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class AuctionState extends State<Auction> {
 
@@ -25,6 +26,13 @@ public class AuctionState extends State<Auction> {
         return stream()
                 .filter(auction -> !auction.getIsOpen())
                 .flatMap(auction -> auction.getWinningBidList(owner))
+                .toList();
+    }
+
+    public List<LostBid> findLostBids(String owner) {
+        return stream()
+                .filter(auction -> !auction.getIsOpen())
+                .flatMap(auction -> auction.getLostBids(owner))
                 .toList();
     }
 }
